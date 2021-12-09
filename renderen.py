@@ -1,9 +1,44 @@
-import cv2 as cv
-import numpy as np
-import math as mth
-import random as rdm
+'''
+    Gemaakt door Daan Sijnja, Student Mechatronica Haagse Hogeschool Delft, Studentnummer: 20177747
+
+    @Description:
+        Vind het intressant om deze dingen uit te zoeken en precies uit te vogelen hoe het werkt
+    
+    @Note:
+        Dit is nu nog vooral wat code om een paar dingentjes te laten zien mischien komt er later een versie waarmee je dingen kan instellen 
+'''
+
+
+
+import cv2 as cv                                                                                        # Importeer OpenCV voor het afbeelden
+import numpy as np                                                                                      # Importeer Numpy voor het makkelijk maken van Matrixen (word niet super veel gebruikt)
+import math as mth                                                                                      # Importeer Math voor het gebruik van sinusen en cosinusen
+import random as rdm                                                                                    # Importeer Random voor Random generatie
+
 
 def draw_fig(img,fig,color=(255,255,255),thickness=1):
+    '''
+        @Input:
+            img: afbeelding of canvas waar de figuren op getekend moeten worden
+
+            fig: het figuur wat er getekend worden
+
+            color: de kleur dat het figuur in getekend moet worden 
+                Standaard: (255, 255, 255)
+
+            thickness: de dikte van de lijnen van het figuur
+                Standaard: 1
+        @Return:
+
+            img: afbeelding of canvas met het figuur er op getekend 
+
+        @Description:
+
+
+    
+    
+    '''
+
     h, w, c = img.shape
     for line in fig:
         p1 = line[0][0:2]
@@ -140,6 +175,10 @@ def generate_random_voxels(amount,cubic=(100,100,100)):
 
     return voxels[:]
 
+'''Alles voor de Cube demo'''
+cube_1 = generate_cube(125)
+cube_2 = generate_cube(87)
+cube_3 = generate_cube(50)
 
 def demo_cube(canvas):
     global cube_1
@@ -161,19 +200,21 @@ def demo_cube(canvas):
 
     return werkvlak
 
-'''Alles voor de Cube demo'''
-cube_1 = generate_cube(125)
-cube_2 = generate_cube(87)
-cube_3 = generate_cube(50)
+'''Cube demo eind'''
 
+
+'''Camera en projection plane'''
 plane = [0,0,0]
 camera = [0,0,-1000]
 
+'''Assen'''
 x_axis = [[[0,0,0],[1000,0,0]]]
 y_axis = [[[0,0,0],[0,1000,0]]]
 z_axis = [[[0,0,0],[0,0,1000]]]
 
-canvas = np.zeros((1024,1024,3),np.uint8)
+'''werk canvas'''
+canvas = np.zeros((640,640,3),np.uint8)
+
 voxels_1 = generate_random_voxels(50,(50,50,50))
 voxels_2 = generate_random_voxels(75,(75,75,75))
 voxels_3 = generate_random_voxels(100,(100,100,100))
@@ -191,25 +232,21 @@ fig4 = translate_fig(fig4,create_transform_matrix(-b,b,b))
 
 while True:
     werkvlak = canvas.copy()
-
-    #fig1 = translate_fig(fig1,create_rot_matrix((1,1,1)))
-    #fig2 = translate_fig(fig2,create_rot_matrix((1,1,1)))
-    #fig3 = translate_fig(fig3,create_rot_matrix((1,1,1)))
-    #fig4 = translate_fig(fig4,create_rot_matrix((1,1,1)))
 #
-#
-#
-    #pers_fig1 = perspective_fig(fig1,plane,camera)
-    #pers_fig2 = perspective_fig(fig2,plane,camera)
-    #pers_fig3 = perspective_fig(fig3,plane,camera)
-    #pers_fig4 = perspective_fig(fig4,plane,camera)
-    #
-    #werkvlak = draw_fig(werkvlak,pers_fig1,(255,0,0),2)
-    #werkvlak = draw_fig(werkvlak,pers_fig2,(0,255,0),2)
-    #werkvlak = draw_fig(werkvlak,pers_fig3,(0,0,255),2)
-    #werkvlak = draw_fig(werkvlak,pers_fig4,(0,255,255),2)
+    fig1 = translate_fig(fig1,create_rot_matrix((1,1,1)))
+    fig2 = translate_fig(fig2,create_rot_matrix((1,1,1)))
+    fig3 = translate_fig(fig3,create_rot_matrix((1,1,1)))
+    fig4 = translate_fig(fig4,create_rot_matrix((1,1,1)))    
+    pers_fig1 = perspective_fig(fig1,plane,camera)
+    pers_fig2 = perspective_fig(fig2,plane,camera)
+    pers_fig3 = perspective_fig(fig3,plane,camera)
+    pers_fig4 = perspective_fig(fig4,plane,camera)
     
-    werkvlak = demo_cube(werkvlak)
+    werkvlak = draw_fig(werkvlak,pers_fig1,(255,0,0),2)
+    werkvlak = draw_fig(werkvlak,pers_fig2,(0,255,0),2)
+    werkvlak = draw_fig(werkvlak,pers_fig3,(0,0,255),2)
+    werkvlak = draw_fig(werkvlak,pers_fig4,(0,255,255),2)
+    #werkvlak = demo_cube(werkvlak)
 
 
     cv.imshow('3d Renderer',werkvlak)
