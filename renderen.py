@@ -8,98 +8,107 @@
         Dit is nu nog vooral wat code om een paar dingentjes te laten zien mischien komt er later een versie waarmee je dingen kan instellen 
 '''
 
-
-
 import cv2 as cv                                                                                        # Importeer OpenCV voor het afbeelden
 import numpy as np                                                                                      # Importeer Numpy voor het makkelijk maken van Matrixen (word niet super veel gebruikt)
 import math as mth                                                                                      # Importeer Math voor het gebruik van sinusen en cosinusen
 import random as rdm                                                                                    # Importeer Random voor Random generatie
 
-def combine_figures(figures):
-    lines = []
-    for figure in figures:
-        for line in figure:
-            lines.append(line)
-    return lines
-
-def check_lines(line1,line2,x,y):
-
-    x1 = [round(line1[0][0],1),round(line1[1][0],1)]
-    x2 = [round(line2[0][0],1),round(line2[1][0],1)]
-
-    y1 = [round(line1[0][1],1),round(line1[1][1],1)]
-    y2 = [round(line2[0][1],1),round(line2[1][1],1)]
-
-    x1.sort()
-    x2.sort()
-    y1.sort()
-    y2.sort()
-    x = round(x,1)
-    y = round(y,1)
-
-    print(x1,x2,y1,y2,x,y)
-    result = ((x >= x1[0] and x <= x1[1]) and (x >= x2[0] and x <= x2[1]) and (y >= y1[0] and y <= y1[1]) and (y >= y2[0] and y <= y2[1]))
-    print(result)
-    return result
-
-def line_intersection(line1,line2):
-    xdiff = (line1[0][0]-line1[1][0],line2[0][0]-line2[1][0])
-    ydiff = (line1[0][1]-line1[1][1],line2[0][1]-line2[1][1])
-    def det(a,b):
-        return a[0]*b[1] - a[1]*b[0]
-    div = det(xdiff,ydiff)
-    if(div == 0):
-        print('F')
-        return False, 0, 0
+def combine_fig(figures):
+    combined_fig = []                                                                                   # Lege lijst voor alle lijnen
+  
+    for figure in figures:                                                                              # For alle figuren in figures
+        for line in figure:                                                                             # For alle lijnen in figuren
+            combined_fig.append(line[:])                                                                # Voeg de lijn toe aan de lijst
     
-    d = (det(*line1[:2]),det(*line2[:2]))
-    x = det(d, xdiff) / div
-    y = det(d, ydiff) / div
+    return combined_fig                                                                                 # Return de gecombineerde figuren lijst
 
-    if(check_lines(line1,line2,x,y) == False):
-        return False, 0, 0
+def check_2d_intersect(line1,line2):
+    #note to self: screenshot 11-12-2021
+    xdiff = (line1[0][0]-line1[1][0],line2[0][0]-line2[1][0])                                           # Bereken de X verschillen van de punten in de lijnen
+    ydiff = (line1[0][1]-line1[1][1],line2[0][1]-line2[1][1])                                           # Bereken de Y verschillen van de punten in de lijnen
 
-    return True, round(x,1), round(y,1)
+    def det(a,b):                                                                                       # Wiskundig trucje voor het berekenen of er een snijpunt mogelijk is
+        return a[0]*b[1] - a[1]*b[0]                                                                    # Wiskundig trucje
 
+    div = det(xdiff,ydiff)                                                                              # Er is een snijpunt wanneer div niet gelijk is aan nul
 
+    if(div == 0):                                                                                       # Check of div niet gelijk is aan 0
+        return False, 0, 0                                                                              # Return dat er geen snijpunt is
+    
+    d = ( det(*line1[:2]), det(*line2[:2]) )                                                            # 
+    x = det( d, xdiff) / div                                                                            # Bereken de X coordinaat van het snijpunt
+    y = det( d, ydiff) / div                                                                            # Bereken de Y coordinaat van het snijpunt
 
-def line_3d_z(line,x,y):
-    xdiff = (round(line[1][0],1)-round(line[0][0],1))
-    ydiff = (round(line[1][1],1)-round(line[0][1],1))
-    t = 0
+    def check_on_line(line,x,y):                                                                        # Check of het coordinaat wel op het gegeven lijnstuk ligt
+        x_ = [line[0][0],line[1][0]]                                                                    # X waardes van de lijn
+        y_ = [line[0][1],line[1][1]]                                                                    # Y waardes van de lijn
 
-    if(xdiff != 0):
-        t = (x -line[1][0])/xdiff
-    else:
-        if(ydiff !=0):
-            t = (y -line[1][1])/ydiff
-        else:
-            return False, t
-
-
-    z = line[0][2] + (line[1][2]-line[0][2])*t
-
-    return True, z
-
-def reorder_lines(lines):
-    all_sorted = True
-    for i in range(1,len(lines)):
-        succes, x, y = line_intersection(lines[i-1][:],lines[i][:])
-        if(succes == True):
-            print('x,y', x,y)
-            if(line_3d_z(lines[i],x,y) > line_3d_z(lines[i-1],x,y)):
-               # print('line', i-1 ,line_3d_z(lines[i-1],x,y), 'line ', i ,line_3d_z(lines[i],x,y), )
-                a = lines[i-1][:]
-                lines[i-1] = lines[i]
-                lines[i] = a
-                lines[i][2] = (255,255,255)
-                all_sorted = False
+        x_.sort()                                                                                       # Sorteer de X waardes
+        y_.sort()                                                                                       # Sorteer de Y waardes
         
-    if(all_sorted == False):
-        #print('R')
-        return reorder_lines(lines[:])  
+        return ((x >= x_[0] and x <= x_[1]) and (y >= y_[0] and y <= y_[1]))                            # Return of het snijpunt op het gegeven lijnstuk liggen
+    #print(check_on_line(line1,x,y) and check_on_line(line2,x,y))
+    if(check_on_line(line1,x,y) and check_on_line(line2,x,y)):                                          # Check of het snijpunt op beide lijnstukken ligt
+        return True, x, y                                                                               # Return dat het snijpunt bestaat en op welke X en Y coordinaat
+    
+    return False, 0, 0                                                                                  # Return dat het snijpunt niet op de lijnstukken liggen
 
-    return lines
+def find_z_value(line,x,y):
+    #note to self: https://www.youtube.com/watch?v=EsM305FEZLk
+    x0, x1 = line[0][0], line[1][0]                                                                     # X coordinaten van de lijn
+    y0, y1 = line[0][1], line[1][1]                                                                     # Y coordinaten van de lijn
+    z0, z1 = line[0][2], line[1][2]                                                                     # Z coordinaten van de lijn
+    
+    dir_val = (abs(x1-x0),abs(y1-y0),abs(z1-z0))                                                        # Directionele vector van de lijn
+
+    if(dir_val[0] != 0):                                                                                # Check of de Directonele waarde van X niet gelijk is aan nul
+        l = (x-x0)/dir_val[0]                                                                           # Bereken de lapda uit x
+    else:
+        if(dir_val[1] != 0):                                                                            # Check of de Directonele waarde van X niet gelijk is aan nul
+            l = (y-y0)/dir_val[1]                                                                       # Bereken de lapda uit y
+        else:
+            l = 0                                                                                       # Als de Directonele waarde van X en Y nul zijn is lapda nul
+    
+    z = z0 + dir_val[2]*l                                                                               # Bereken z
+    
+    return z                                                                                            # Return z
+
+
+def order_lines(img,lines):
+    #note to self: bubble sorting
+    h, w, c = img.shape #weghalen
+    
+    orderd_lines = lines[:]                                                                             # Maak een copie van de lijst met lijnen
+    all_orderd = True                                                                                   # Check variable om te kijken waneer je klaar bent met lussen
+    for i in range(1,len(orderd_lines)):
+        succes, x, y = check_2d_intersect(orderd_lines[i-1],orderd_lines[i])
+        cv.circle(img,(int(x)+(h//2),int(y)+(w//2)),5,(255,255,255))
+        
+        if(succes == True):
+            z0, z1 = find_z_value(orderd_lines[i],x,y) , find_z_value(orderd_lines[i-1],x,y)
+            print(z0,z1 , orderd_lines[i][2], orderd_lines[i-1][2])
+            if(z0 > z1):
+                #weghalen
+
+                _ = orderd_lines[i]
+                orderd_lines[i] = orderd_lines[i-1]
+                orderd_lines[i-1] = _
+
+                all_orderd = False
+        print('                    ')
+    if(all_orderd == False):
+        return order_lines(img,orderd_lines)
+
+
+    return orderd_lines#, x, y
+
+def test_orderd(lines):
+    a = []
+    for i in lines:
+        a.append(i[2])
+
+    print(a)
+
 
 def draw_fig(img,figs,color=(255,255,255),thickness=1):
     '''
@@ -120,9 +129,11 @@ def draw_fig(img,figs,color=(255,255,255),thickness=1):
         @Description:
 
     '''
-    lines = combine_figures(figs)
-
-    lines = reorder_lines(lines)
+    lines = combine_fig(figs)
+    lines = order_lines(img,lines)
+    #test_orderd(lines)
+    #print(x,y)
+    
     h, w, c = img.shape
     
     for line in lines:
@@ -134,7 +145,8 @@ def draw_fig(img,figs,color=(255,255,255),thickness=1):
         p1 = [int(p1[0])+(h//2),int(p1[1])+(w//2)]
         p2 = [int(p2[0])+(h//2),int(p2[1])+(w//2)]
         cv.line(img,p1,p2,color,thickness)
-
+    #cv.circle(img,(int(x)+(h//2),int(y)+(w//2)),5,(255,255,255))
+   
     return img
 
 def matrix_point_vgm(p,m):
@@ -213,21 +225,21 @@ def generate_cube(size,color):
     cube = [
         #voorkant
         [[-size,-size,size],[size,-size,size],color],
-        #[[size,-size,size],[size,size,size],color],
-        #[[size,size,size],[-size,size,size],color],
-        #[[-size,size,size],[-size,-size,size],color],
+        [[size,-size,size],[size,size,size],color],
+        [[size,size,size],[-size,size,size],color],
+        [[-size,size,size],[-size,-size,size],color],
         #ribben voor naar achter
-        #[[-size,-size,size],[-size,-size,-size],color],
-        #[[size,-size,size],[size,-size,-size],color],
-        #[[size,size,size],[size,size,-size],color],
-        #[[-size,size,size],[-size,size,-size],color],
-        #achterkant
-        #[[-size,-size,-size],[size,-size,-size],color],
-        #[[size,-size,-size],[size,size,-size],color],
+        [[-size,-size,size],[-size,-size,-size],color],
+        [[size,-size,size],[size,-size,-size],color],
+        [[size,size,size],[size,size,-size],color],
+        [[-size,size,size],[-size,size,-size],color],
+        ##achterkant
+        [[-size,-size,-size],[size,-size,-size],color],
+        [[size,-size,-size],[size,size,-size],color],
         [[size,size,-size],[-size,size,-size],color],
-        #[[-size,size,-size],[-size,-size,-size],color],
-        #midpoint
-        [[0,0,0],[0,0,0],color],
+        [[-size,size,-size],[-size,-size,-size],color],
+        ##midpoint
+        #[[0,0,0],[0,0,0],color],
         ]
 
     return cube[:]
@@ -322,8 +334,8 @@ fig =  [
         #voorkant
         [[-100,-100,-100],[100,-100,-100],(127,127,127)],
         [[100,-100,100],[100,100,100],(127,0,0)],
-        [[100,100,100],[-100,100,100],(0,127,0)],
-        [[-100,100,100],[-100,-100,100],(0,0,127)],
+        #[[100,100,100],[-100,100,100],(0,127,0)],
+        #[[-100,100,100],[-100,-100,100],(0,0,127)],
         #ribben voor naar achter
         #[[-100,-100,100],[-100,-100,-100],(255,255,255)],
         #[[100,-100,100],[100,-100,-100],(255,0,0)],
@@ -335,20 +347,22 @@ fig =  [
         #[[100,100,-100],[-100,100,-100],(0,127,255)],
         #[[-100,100,-100],[-100,-100,-100],(0,255,127)],
         #midpoint
-        [[0,0,0],[0,0,0],(0,0,0)],
+        #[[0,0,0],[0,0,0],(0,0,0)],
         ]
 
-fig2 = [[[-0,50,125],[0,-50,175],(0,255,255)],[[50,0,25],[-50,0,25],(225,225,0)]]
+fig2 = [[[-0,50,75],[0,-50,125],(0,255,255)],[[50,0,0],[-50,0,0],(225,225,0)]]
 
 while True:
     werkvlak = canvas.copy()
     
     fig2 = translate_fig(fig2,create_rot_matrix((0,1,0)))
+    fig = translate_fig(fig,create_rot_matrix((1,0,0)))
 
-    werkvlak = demo_cube(werkvlak)
-    #werkvlak = draw_fig(werkvlak,[fig2],thickness=10)
+    #werkvlak = demo_cube(werkvlak)
+    werkvlak = draw_fig(werkvlak,[fig,fig2],thickness=5)
 
     cv.imshow('3d Renderer',werkvlak)
+    cv.waitKey(0)
 
     k = cv.waitKey(30) & 0xff
     if (k == 27):
