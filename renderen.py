@@ -139,7 +139,7 @@ def combine_fig(figures):
     
     return combined_fig                                                                                 # Return de gecombineerde figuren lijst
 
-def draw_fig(img,figs,color=(255,255,255),thickness=1):
+def draw_fig(img,figs,color=(255,255,255),thickness=1,calulate_order=True):
     '''
         @Input:
             img: afbeelding of canvas waar de figuren op getekend moeten worden
@@ -159,8 +159,9 @@ def draw_fig(img,figs,color=(255,255,255),thickness=1):
 
     '''
     lines = combine_fig(figs)
-    lines = order_lines(lines)
-    #test_all_intersections(lines,img)
+    if(calulate_order != False):
+        lines = order_lines(lines)
+  
     h, w, c = img.shape
     
     for line in lines:
@@ -326,18 +327,62 @@ cube_yellow = generate_cube(50,(0,255,255))
 cube_green = generate_cube(50,(0,255,0))
 cube_blue = generate_cube(50,(255,0,0))
 
-translate_fig(cube_red,create_transform_matrix(50,50,50))
+t = 57
 
+cube_red = translate_fig(cube_red,create_transform_matrix(t,t,t))
+cube_yellow = translate_fig(cube_yellow,create_transform_matrix(-t,-t,t))
+cube_green = translate_fig(cube_green,create_transform_matrix(t,-t,-t))
+cube_blue = translate_fig(cube_blue,create_transform_matrix(-t,t,-t))
 
 def demo_4_cubes(canvas):
     global cube_red
     global cube_yellow
     global cube_green
     global cube_blue
+    angle = (0,5,1)
+    cube_red = translate_fig(cube_red,create_rot_matrix(angle))
+    cube_yellow = translate_fig(cube_yellow,create_rot_matrix(angle))
+    cube_green = translate_fig(cube_green,create_rot_matrix(angle))
+    cube_blue = translate_fig(cube_blue,create_rot_matrix(angle))
 
-
+    cube_red_pers = perspective_fig(cube_red,plane,camera)
+    cube_yellow_pers = perspective_fig(cube_yellow,plane,camera)
+    cube_green_pers = perspective_fig(cube_green,plane,camera)
+    cube_blue_pers = perspective_fig(cube_blue,plane,camera)
+    
+    werkvlak = draw_fig(canvas,[cube_red_pers,cube_yellow_pers,cube_green_pers,cube_blue_pers],thickness=3)
+    
+    return werkvlak
 
 '''Cube 4 demo eind'''
+
+'''Solar system demo'''
+colors = [(255,0,0),(0,255,0),(0,0,255),(255,255,0),(255,0,255),(0,255,255)]
+satil = []
+
+for i in range(31):
+    satil.append([ Line([10,0,0],[-10,0,0],colors[i%len(colors)]),Line([7,20,0],[3,0,0],colors[i%len(colors)]), Line([-5,20,0],[-5,0,0],colors[i%len(colors)]), Line([7,20,0],[9,20,0],colors[i%len(colors)])])
+    
+    #generate_cube(10,colors[i%len(colors)])
+offset = 20
+
+for i in range(len(satil)):
+    satil[i] = translate_fig(satil[i],create_transform_matrix(offset*i - offset*(len(satil)//2),0,0))
+
+def demo_solar(canvas):
+    
+    global satil
+
+    for i in range(len(satil)):
+        satil[i] = translate_fig(satil[i],create_rot_matrix((abs((i+1)*0.5-0.5*(len(satil)//2+1)),0,0)))
+
+    werkvlak = draw_fig(canvas,satil,thickness=3,calulate_order=False)
+
+    return werkvlak
+
+'''Solar system demo eind'''
+
+
 '''Camera en projection plane'''
 plane = [0,0,0]
 camera = [0,0,-1000]
@@ -354,8 +399,9 @@ canvas = np.zeros((640,640,3),np.uint8)
 while True:
     werkvlak = canvas.copy()
 
-    werkvlak = demo_cube(werkvlak)
-
+    #werkvlak = demo_cube(werkvlak)
+    #werkvlak = demo_4_cubes(werkvlak)
+    werkvlak = demo_solar(werkvlak)
     cv.imshow('3d Renderer',werkvlak)
 
 
