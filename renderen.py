@@ -24,6 +24,8 @@ def combine_fig(figures):
 
 def check_2d_intersect(line1,line2):
     #note to self: screenshot 11-12-2021
+    if(line1[2] != line2[2]):
+        print('newline',line1,line2)
     xdiff = (line1[0][0]-line1[1][0],line2[0][0]-line2[1][0])                                           # Bereken de X verschillen van de punten in de lijnen
     ydiff = (line1[0][1]-line1[1][1],line2[0][1]-line2[1][1])                                           # Bereken de Y verschillen van de punten in de lijnen
 
@@ -45,9 +47,10 @@ def check_2d_intersect(line1,line2):
 
         x_.sort()                                                                                       # Sorteer de X waardes
         y_.sort()                                                                                       # Sorteer de Y waardes
-        
+        if(line1[2] != line2[2]):
+            print((x >= x_[0] and x <= x_[1]), (y >= y_[0] and y <= y_[1]))
         return ((x >= x_[0] and x <= x_[1]) and (y >= y_[0] and y <= y_[1]))                            # Return of het snijpunt op het gegeven lijnstuk liggen
-    #print(check_on_line(line1,x,y) and check_on_line(line2,x,y))
+    
     if(check_on_line(line1,x,y) and check_on_line(line2,x,y)):                                          # Check of het snijpunt op beide lijnstukken ligt
         return True, x, y                                                                               # Return dat het snijpunt bestaat en op welke X en Y coordinaat
     
@@ -80,13 +83,15 @@ def order_lines(img,lines):
     
     orderd_lines = lines[:]                                                                             # Maak een copie van de lijst met lijnen
     all_orderd = True                                                                                   # Check variable om te kijken waneer je klaar bent met lussen
+    
     for i in range(1,len(orderd_lines)):
+        
         succes, x, y = check_2d_intersect(orderd_lines[i-1],orderd_lines[i])
         cv.circle(img,(int(x)+(h//2),int(y)+(w//2)),5,(255,255,255))
         
         if(succes == True):
             z0, z1 = find_z_value(orderd_lines[i],x,y) , find_z_value(orderd_lines[i-1],x,y)
-            print(z0,z1 , orderd_lines[i][2], orderd_lines[i-1][2])
+            #print(z0,z1 , orderd_lines[i][2], orderd_lines[i-1][2])
             if(z0 > z1):
                 #weghalen
 
@@ -95,7 +100,7 @@ def order_lines(img,lines):
                 orderd_lines[i-1] = _
 
                 all_orderd = False
-        print('                    ')
+        #print('                    ')
     if(all_orderd == False):
         return order_lines(img,orderd_lines)
 
@@ -129,6 +134,7 @@ def draw_fig(img,figs,color=(255,255,255),thickness=1):
         @Description:
 
     '''
+    print('new_frame')
     lines = combine_fig(figs)
     lines = order_lines(img,lines)
     #test_orderd(lines)
@@ -350,16 +356,16 @@ fig =  [
         #[[0,0,0],[0,0,0],(0,0,0)],
         ]
 
-fig2 = [[[-0,50,75],[0,-50,125],(0,255,255)],[[50,0,0],[-50,0,0],(225,225,0)]]
+fig2 = [[[-0,50,100],[0,-50,175],(0,255,255)],[[50,0,0],[-50,0,0],(225,225,0)]]
 
 while True:
     werkvlak = canvas.copy()
     
-    fig2 = translate_fig(fig2,create_rot_matrix((0,1,0)))
-    fig = translate_fig(fig,create_rot_matrix((1,0,0)))
+    #fig2 = translate_fig(fig2,create_rot_matrix((0,1,0)))
+    #fig = translate_fig(fig,create_rot_matrix((1,0,0)))
 
-    #werkvlak = demo_cube(werkvlak)
-    werkvlak = draw_fig(werkvlak,[fig,fig2],thickness=5)
+    werkvlak = demo_cube(werkvlak)
+    #werkvlak = draw_fig(werkvlak,[fig,fig2],thickness=5)
 
     cv.imshow('3d Renderer',werkvlak)
     cv.waitKey(0)
