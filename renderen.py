@@ -18,7 +18,6 @@ NO_INTERSECT = 0
 DO_INTERSECT = 1
 COLLINIAR = 2
 
-
 class Line:
     def __init__(self,p1,p2,color):
         self.p1 = p1[:]
@@ -238,8 +237,6 @@ def create_transform_matrix(x,y,z):
                 ]
     return trans_mat
 
-
-
 def generate_cube(size,color):
     cube = [
         #voorkant
@@ -294,6 +291,45 @@ def generate_random_voxels(amount,cubic=(100,100,100)):
         voxels.append([p,p])
 
     return voxels[:]
+
+charcarters = {
+    'a': [[],[]],
+    'b': [],
+    'c': [],
+    'd': [],
+    'e': [],
+    'f': [],
+    'g': [],
+    'h': [],
+    'i': [],
+    'j': [],
+    'k': [],
+    'l': [],
+    'n': [],
+    'm': [],
+    'o': [],
+    'p': [],
+    'q': [],
+    'r': [],
+    's': [],
+    't': [],
+    'u': [],
+    'v': [],
+    'w': [],
+    'x': [],
+    'y': [],
+    'z': [],
+}
+
+
+
+
+def generate_symbol(char):
+
+
+    return
+
+
 
 '''Alles voor de Cube demo'''
 cube_1 = generate_cube(125,(255,255,0))
@@ -401,7 +437,10 @@ while True:
 
     #werkvlak = demo_cube(werkvlak)
     #werkvlak = demo_4_cubes(werkvlak)
-    werkvlak = demo_solar(werkvlak)
+    #werkvlak = demo_solar(werkvlak)
+    fig = generate_cube(30,(255,255,255))
+    werkvlak = draw_fig(werkvlak,[fig])
+
     cv.imshow('3d Renderer',werkvlak)
 
 
